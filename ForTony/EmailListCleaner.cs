@@ -16,6 +16,8 @@ namespace ForTony
 
 		private EmailListCleanResults Results { get; set; }
 
+		private string ExecuteStamp { get; set; }
+
 		private List<string> __BlackListEmails = null;
 		private List<string> BlackListEmails
 		{
@@ -67,6 +69,8 @@ namespace ForTony
 			Results = new EmailListCleanResults();
 
 			Results.WasSuccess = true;
+
+			ExecuteStamp = DateTime.Now.ToString("yyyyMMddHHmmss");
 
 			// Ensure both text boxes have values.
 			if (!string.IsNullOrWhiteSpace(DirectoryToClean)
@@ -206,7 +210,8 @@ namespace ForTony
 			try
 			{
 				// First move our file.
-				string oldFile = string.Format("{0}.old", currentFile);
+				string oldFile = string.Format("{0}.{1}.old", currentFile, ExecuteStamp);
+
 				File.Move(currentFile, oldFile);
 				using (StreamReader srRead = new StreamReader(oldFile))
 				using (StreamWriter srWrite = new StreamWriter(currentFile))

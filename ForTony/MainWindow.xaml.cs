@@ -12,6 +12,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using System.Windows.Forms;
+using ForTony.Properties;
 
 namespace ForTony
 {
@@ -20,9 +21,30 @@ namespace ForTony
 	/// </summary>
 	public partial class MainWindow : Window
 	{
+		private Settings __Settings = null;
+		private Settings UserSettings
+		{
+			get
+			{
+				if (__Settings == null)
+				{
+					__Settings = new Settings();
+					__Settings.Reload();
+				}
+
+				return __Settings;
+			}
+		}
+
 		public MainWindow()
 		{
 			InitializeComponent();
+			CheckValidityAndEnable();
+
+			txtBlackList.Text = UserSettings.BlackListFile;
+			txtClean.Text = UserSettings.CleanDirectory;
+			chkBackupFiles.IsChecked = UserSettings.KeepBackup;
+
 			CheckValidityAndEnable();
 		}
 
@@ -71,9 +93,16 @@ namespace ForTony
 		/// <param name="e"></param>
 		private void btnExecute_Click(object sender, RoutedEventArgs e)
 		{
+			UserSettings.KeepBackup = chkBackupFiles.IsChecked.Value;
 			EmailListCleaner.Get().BackupFiles = chkBackupFiles.IsChecked.Value;
+
+			UserSettings.BlackListFile = txtBlackList.Text;
 			EmailListCleaner.Get().BlackListFile = txtBlackList.Text;
+
+			UserSettings.CleanDirectory = txtClean.Text;
 			EmailListCleaner.Get().DirectoryToClean = txtClean.Text;
+
+			UserSettings.Save();
 
 			EmailListCleanResults results = EmailListCleaner.Get().Clean();
 
