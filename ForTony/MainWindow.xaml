@@ -1,0 +1,28 @@
+﻿<Window x:Class="ForTony.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="MainWindow" Height="350" Width="525">
+    <Grid ClipToBounds="True" ShowGridLines="False">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="28" />
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto" />
+            <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
+        <Label Grid.Row="0" Grid.Column="0" Content="Black List File:" HorizontalAlignment="Right" />
+        <Label Grid.Row="1" Grid.Column="0" Content="Directory to Clean:" HorizontalAlignment="Right" />
+        <Label Grid.Row="2" Grid.Column="0" Content="Log:" HorizontalAlignment="Right" />
+        <TextBox Grid.Column="1" Margin="3,3,40,3" Name="txtBlackList" />
+        <TextBox Grid.Column="1" Grid.Row="1" Margin="3,3,40,3" Name="txtClean" />
+        <TextBox Grid.Column="1" Grid.Row="2" Margin="3,3,0,3" Name="txtLog" AcceptsTab="True" AcceptsReturn="True" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" />
+        <Button Grid.Row="3" HorizontalAlignment="Left" 
+            MinWidth="80" Margin="3,0,0,6" Content="Clean" Height="22" VerticalAlignment="Bottom" Grid.Column="1" Name="btnExecute" Click="btnExecute_Click" />
+        <Button Content="..." Grid.Column="1" Height="23" Margin="0,2,0,0"  Name="btnBlackList" VerticalAlignment="Top" HorizontalAlignment="Right" Width="34" ClipToBounds="False" Click="btnBlackList_Click" />
+        <Button Content="..." Grid.Column="1" Grid.Row="1" Height="23" HorizontalAlignment="Right" Margin="0,5,0,0" Name="btnClean" VerticalAlignment="Top" Width="34" Click="btnClean_Click" />
+        <CheckBox Content="Backup Files" Grid.Column="1" Grid.Row="3" Height="16" HorizontalAlignment="Left" Margin="89,0,0,9" Name="chkBackupFiles" VerticalAlignment="Bottom" IsChecked="True" />
+    </Grid>
+</Window>
