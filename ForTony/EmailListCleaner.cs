@@ -274,6 +274,7 @@ namespace ForTony
 					string line = srRead.ReadLine();
 					while (!string.IsNullOrWhiteSpace(line))
 					{
+						bool foundFilter = false;
 						if (!BlackListEmails.Contains(line))
 						{
 							foreach (string filter in Filters)
@@ -288,17 +289,23 @@ namespace ForTony
 										Results.TotalUniqueEmailsRemoved++;
 										EmailsRemoved.Add(line);
 									}
+
+									foundFilter = true;
+									break;
 								}
 							}
 
-							Results.TotalEmailsKept++;
-							if (!EmailsKept.Contains(line))
+							if (!foundFilter)
 							{
-								Results.TotalUniqueEmailsKept++;
-								EmailsKept.Add(line);
-							}
+								Results.TotalEmailsKept++;
+								if (!EmailsKept.Contains(line))
+								{
+									Results.TotalUniqueEmailsKept++;
+									EmailsKept.Add(line);
+								}
 
-							srWrite.WriteLine(line);
+								srWrite.WriteLine(line);
+							}
 						}
 						else
 						{
