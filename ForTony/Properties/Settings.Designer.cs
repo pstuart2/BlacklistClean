@@ -58,5 +58,17 @@ namespace ForTony.Properties {
                 this["KeepBackup"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string FilterFile {
+            get {
+                return ((string)(this["FilterFile"]));
+            }
+            set {
+                this["FilterFile"] = value;
+            }
+        }
     }
 }

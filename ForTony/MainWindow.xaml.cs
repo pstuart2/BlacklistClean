@@ -43,7 +43,13 @@ namespace ForTony
 
 			txtBlackList.Text = UserSettings.BlackListFile;
 			txtClean.Text = UserSettings.CleanDirectory;
+			txtFilter.Text = UserSettings.FilterFile;
 			chkBackupFiles.IsChecked = UserSettings.KeepBackup;
+
+			txtLog.Text = @"Directory to clean is required.
+You can select a black list file for cleaning or a file for
+removing phrases. You have to have at least one defined. You
+can have both defined as well.";
 
 			CheckValidityAndEnable();
 		}
@@ -87,6 +93,27 @@ namespace ForTony
 		}
 
 		/// <summary>
+		/// Optional filter file.
+		/// </summary>
+		/// <param name="sender"></param>
+		/// <param name="e"></param>
+		private void btnFilter_Click(object sender, RoutedEventArgs e)
+		{
+			var dialog = new OpenFileDialog()
+			{
+				CheckFileExists = true,
+				Filter = "CSV|*.csv"
+			};
+			DialogResult result = dialog.ShowDialog();
+			if (result == System.Windows.Forms.DialogResult.OK)
+			{
+				txtFilter.Text = dialog.FileName;
+			}
+
+			CheckValidityAndEnable();
+		}
+
+		/// <summary>
 		/// Execute me!
 		/// </summary>
 		/// <param name="sender"></param>
@@ -102,6 +129,9 @@ namespace ForTony
 			UserSettings.CleanDirectory = txtClean.Text;
 			EmailListCleaner.Get().DirectoryToClean = txtClean.Text;
 
+			UserSettings.FilterFile = txtFilter.Text;
+			EmailListCleaner.Get().FilterFile = txtFilter.Text;
+
 			UserSettings.Save();
 
 			EmailListCleanResults results = EmailListCleaner.Get().Clean();
@@ -114,11 +144,15 @@ namespace ForTony
 			bool isValid = true;
 			// Ensure both text boxes have values.
 			if (!string.IsNullOrWhiteSpace(txtClean.Text)
-				&& !string.IsNullOrWhiteSpace(txtBlackList.Text))
+				&& (!string.IsNullOrWhiteSpace(txtBlackList.Text) || 
+				!string.IsNullOrWhiteSpace(txtFilter.Text)))
 			{
 				// Ensure the validity of those values.
-				if (!System.IO.File.Exists(txtBlackList.Text)) isValid = false;
 				if (!System.IO.Directory.Exists(txtClean.Text)) isValid = false;
+				if(!string.IsNullOrWhiteSpace(txtBlackList.Text))
+					if (!System.IO.File.Exists(txtBlackList.Text)) isValid = false;
+				if (!string.IsNullOrWhiteSpace(txtFilter.Text))
+					if (!System.IO.File.Exists(txtFilter.Text)) isValid = false;
 			}
 			else
 			{
@@ -127,6 +161,21 @@ namespace ForTony
 
 			btnExecute.IsEnabled = isValid;
 			return isValid;
+		}
+
+		private void txtBlackList_TextChanged(object sender, TextChangedEventArgs e)
+		{
+			CheckValidityAndEnable();
+		}
+
+		private void txtClean_TextChanged(object sender, TextChangedEventArgs e)
+		{
+			CheckValidityAndEnable();
+		}
+
+		private void txtFilter_TextChanged(object sender, TextChangedEventArgs e)
+		{
+			CheckValidityAndEnable();
 		}
 	}
 }

@@ -13,6 +13,7 @@ namespace ForTony
 		public bool BackupFiles { get; set; }
 		public string BlackListFile { get; set; }
 		public string DirectoryToClean { get; set; }
+		public string FilterFile { get; set; }
 
 		private EmailListCleanResults Results { get; set; }
 
@@ -25,6 +26,16 @@ namespace ForTony
 			{
 				if (__BlackListEmails == null) __BlackListEmails = new List<string>();
 				return __BlackListEmails;
+			}
+		}
+
+		private List<string> __Filters = null;
+		private List<string> Filters
+		{
+			get
+			{
+				if (__Filters == null) __Filters = new List<string>();
+				return __Filters;
 			}
 		}
 
@@ -77,12 +88,20 @@ namespace ForTony
 				&& !string.IsNullOrWhiteSpace(BlackListFile))
 			{
 				// Ensure the validity of those values.
-				if (!File.Exists(BlackListFile))
+				if (!string.IsNullOrWhiteSpace(BlackListFile) && !File.Exists(BlackListFile))
 				{
 					Results.Log.AppendFormat("Black list file [{0}] doesn't exist.", BlackListFile)
 						.AppendLine();
 					Results.WasSuccess = false;
 				}
+
+				if (!string.IsNullOrWhiteSpace(FilterFile) && !File.Exists(FilterFile))
+				{
+					Results.Log.AppendFormat("Filter list file [{0}] doesn't exist.", BlackListFile)
+						.AppendLine();
+					Results.WasSuccess = false;
+				}
+
 				if (!Directory.Exists(DirectoryToClean))
 				{
 					Results.Log.AppendFormat("Directory to clean [{0}] doesn't exist.", DirectoryToClean)
@@ -101,7 +120,7 @@ namespace ForTony
 			// Should we continue?
 			if (Results.WasSuccess)
 			{
-				if (!ProcessBlackListFile() || !ProcessDirectory())
+				if (!ProcessBlackListFile() || !ProcessFilterFile() || !ProcessDirectory())
 				{
 					// There was an error.
 					Results.WasSuccess = false;
@@ -125,6 +144,8 @@ namespace ForTony
 		/// <returns></returns>
 		private bool ProcessBlackListFile()
 		{
+			if(string.IsNullOrWhiteSpace(BlackListFile)) { return true; }
+
 			bool wasSuccess = false;
 
 			try
@@ -156,6 +177,40 @@ namespace ForTony
 		}
 
 		/// <summary>
+		/// Load our filter file.
+		/// </summary>
+		/// <returns></returns>
+		private bool ProcessFilterFile()
+		{
+			if (string.IsNullOrWhiteSpace(FilterFile)) { return true; }
+
+			bool wasSuccess = false;
+
+			try
+			{
+				using (StreamReader sr = new StreamReader(FilterFile))
+				{
+					wasSuccess = true;
+					string line = sr.ReadLine();
+					while (!string.IsNullOrWhiteSpace(line))
+					{
+						if (!Filters.Contains(line))
+							Filters.Add(line);
+						line = sr.ReadLine();
+					}
+
+					sr.Close();
+				}
+			}
+			catch (Exception e)
+			{
+				wasSuccess = false;
+				Results.Log.AppendFormat("Exception: {0}", e.Message).AppendLine();
+			}
+			return wasSuccess;
+		}
+
+		/// <summary>
 		/// Process our clean directory.
 		/// </summary>
 		/// <returns></returns>
@@ -171,7 +226,7 @@ namespace ForTony
 					wasSuccess = true;
 					foreach (string file in files)
 					{
-						if (file != BlackListFile)
+						if (file != BlackListFile && file != FilterFile)
 						{
 							if (!ProcessFileInDirectory(file))
 							{
@@ -221,6 +276,21 @@ namespace ForTony
 					{
 						if (!BlackListEmails.Contains(line))
 						{
+							foreach (string filter in Filters)
+							{
+								if (line.Contains(filter))
+								{
+									Results.Log.AppendFormat("Removing email [{0}] because of filter '{1}'.", line, filter)
+										.AppendLine();
+									Results.TotalEmailsRemoved++;
+									if (!EmailsRemoved.Contains(line))
+									{
+										Results.TotalUniqueEmailsRemoved++;
+										EmailsRemoved.Add(line);
+									}
+								}
+							}
+
 							Results.TotalEmailsKept++;
 							if (!EmailsKept.Contains(line))
 							{
